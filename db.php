@@ -15,24 +15,24 @@ if ($conn->connect_error) {
 }
 $conn->set_charset('utf8mb4');
 
-// Create all tables
-$sqls = [
-"CREATE TABLE IF NOT EXISTS users (
+$conn->query("CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(80) NOT NULL UNIQUE,
     email VARCHAR(180),
     password VARCHAR(255) NOT NULL,
     role ENUM('admin','member') DEFAULT 'member',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)",
-"CREATE TABLE IF NOT EXISTS categories (
+)");
+
+$conn->query("CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80) NOT NULL,
     color VARCHAR(20) DEFAULT '#378ADD',
     created_by INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)",
-"CREATE TABLE IF NOT EXISTS tasks (
+)");
+
+$conn->query("CREATE TABLE IF NOT EXISTS tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     created_by INT NOT NULL,
     assigned_to INT,
@@ -45,40 +45,18 @@ $sqls = [
     progress_note TEXT,
     done TINYINT(1) DEFAULT 0,
     recurring ENUM('none','daily','weekly','monthly') DEFAULT 'none',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
-)",
-"CREATE TABLE IF NOT EXISTS comments (
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
+
+$conn->query("CREATE TABLE IF NOT EXISTS comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     task_id INT NOT NULL,
     user_id INT NOT NULL,
     body TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)",
-"CREATE TABLE IF NOT EXISTS email_notifications (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    task_id INT NOT NULL,
-    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
-)"
-];
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
 
-foreach ($sqls as $sql) {
-    $conn->query($sql);
-}
-
-// Seed default categories if empty
 $res = $conn->query("SELECT COUNT(*) as c FROM categories");
 if ($res && $res->fetch_assoc()['c'] == 0) {
-    $conn->query("INSERT INTO categories (name,color,created_by) VALUES
-        ('Work','#378ADD',NULL),
-        ('Personal','#63c55a',NULL),
-        ('Family','#f0a500',NULL),
-        ('Urgent','#E24B4A',NULL)");
+    $conn->query("INSERT INTO categories (name,color,created_by) VALUES ('Work','#378ADD',NULL),('Personal','#63c55a',NULL),('Family','#f0a500',NULL),('Urgent','#E24B4A',NULL)");
 }

@@ -178,7 +178,7 @@ if ($action === 'update_task') {
     $recurring = $_POST['recurring'] ?? 'none';
     if (empty($due)) $due = null;
     $stmt = $conn->prepare("UPDATE tasks SET title=?,description=?,due_date=?,priority=?,progress=?,progress_note=?,done=?,assigned_to=?,category_id=?,recurring=? WHERE id=?");
-    $stmt->bind_param('ssssiisiii s', $title,$desc,$due,$priority,$progress,$note,$done,$assigned,$cat,$recurring,$id);
+    $stmt->bind_param('ssssiisisssi', $title,$desc,$due,$priority,$progress,$note,$done,$assigned,$cat,$recurring,$id);
     $stmt->execute();
     echo json_encode(['ok'=>true]); exit;
 }
